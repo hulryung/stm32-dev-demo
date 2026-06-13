@@ -1,3 +1,9 @@
 [submodule "x-cube-n6-ai-people-detection-tracking"]
 	path = x-cube-n6-ai-people-detection-tracking
 	url = https://github.com/STMicroelectronics/x-cube-n6-ai-people-detection-tracking.git
+[submodule "x-cube-n6-ai-multi-pose-estimation"]
+	path = x-cube-n6-ai-multi-pose-estimation
+	url = https://github.com/STMicroelectronics/x-cube-n6-ai-multi-pose-estimation.git
+[submodule "x-cube-n6-ai-hand-landmarks"]
+	path = x-cube-n6-ai-hand-landmarks
+	url = https://github.com/STMicroelectronics/x-cube-n6-ai-hand-landmarks.git
