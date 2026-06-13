@@ -49,10 +49,37 @@ DKEL="$BIN/ExternalLoader/MX66UW1G45G_STM32N6570-DK.stldr"
 
 절차: 개발 모드로 전환 → 플래싱 → 플래시 부팅 모드로 복귀 → 전원 리셋.
 
+## 소스 빌드 (컨테이너)
+
+호스트 환경에 의존하지 않도록 빌드는 컨테이너 안에서 한다. Arm GNU Toolchain 15.2와
+GNU Make를 이미지에 고정해두어 재현 가능하다. Apple Silicon에서는 Apple `container`,
+그 외에는 Docker를 자동으로 선택한다.
+
+```bash
+git submodule update --init --recursive   # 데모 소스 가져오기 (최초 1회)
+./scripts/build.sh                         # 컨테이너에서 빌드
+./scripts/build.sh clean                   # 정리
+```
+
+산출물은 `x-cube-n6-ai-people-detection-tracking/build/Project.{elf,hex,bin}`에 생성된다.
+
+환경 변수로 조정 가능: `DEMO=<다른 데모 디렉터리>`, `MEM=8g`(OOM 시 상향),
+`JOBS=6`(병렬 컴파일 수), `RUNTIME=docker|container`(런타임 강제).
+
+> **컨테이너에서 자동 처리되는 두 가지:**
+> 1. ST Makefile의 `-fcyclomatic-complexity`(IAR/구버전 전용, mainline GCC가 거부)를 빌드 시 제거.
+> 2. Apple `container`는 기본 메모리가 작아 대용량 모델 파일 컴파일 중 OOM(`Killed`)이 난다 → 스크립트가 8GB를 할당.
+
+빌드 환경 정의는 [`docker/Dockerfile`](docker/Dockerfile), 실행 로직은
+[`scripts/build.sh`](scripts/build.sh) 참고. (호스트에 직접 `gmake`로 빌드할 수도 있으나,
+macOS 기본 `make` 3.81은 `$(file ...)` 미지원이라 `brew install make` 후 `gmake`가 필요하다.)
+
 ## 데모
 
 - `x-cube-n6-ai-people-detection-tracking/` (서브모듈) — YoloX 사람 감지 + 추적, NPU 가속.
-  프리빌트 hex 포함, 소스 빌드는 `make -j8` 후 `STM32_SigningTool_CLI` 서명 필요 (README 참고).
+  프리빌트 hex 포함. 소스 빌드는 위 "소스 빌드" 절 참고. flash 부팅용으로 쓰려면 빌드 후
+  `STM32_SigningTool_CLI -bin build/Project.bin -nk -t ssbl -hv 2.3 -o build/Project_sign.bin`로
+  서명하고 `0x70100000`에 기록한다 (서브모듈 README 참고).
 - 그 외 ST 공개 데모: [multi-pose-estimation](https://github.com/STMicroelectronics/x-cube-n6-ai-multi-pose-estimation),
   [face-landmarks](https://github.com/STMicroelectronics/x-cube-n6-ai-face-landmarks),
   [hand-landmarks](https://github.com/STMicroelectronics/x-cube-n6-ai-hand-landmarks),
