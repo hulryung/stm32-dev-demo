@@ -1,0 +1,13 @@
+# Build artifacts
+build/
+*.o
+*.elf
+*.map
+*_sign.bin
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
